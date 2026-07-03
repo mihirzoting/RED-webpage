@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>RED — Refine Every Detail · AI-Powered Prompt Intelligence</title>
+<meta name="description" content="RED is a Chrome extension that scores, flags, and rewrites your AI prompts in real time. Refine every detail before you send." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=Inter:wght@400;500;600;700&family=Georgia&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#FAF9F6;
+    --cream-2:#F3F0E8;
+    --ink:#1C1917;
+    --muted:#6B655C;
+    --line:#1C1917;
+    --soft-line:#E8E4DE;
+    --indigo:#534AB7;
+    --indigo-tint:#EEECFB;
+    --teal:#1D9E75;
+    --teal-tint:#E6F4EC;
+    --amber:#EF9F27;
+    --amber-bg:#FFF3DC;
+    --amber-fg:#B45309;
+    --amber-tint:#FDF3E1;
+    --red:#E24B4A;
+    --red-tint:#FBE9E7;
+    --blue:#3B82F6;
+    --blue-bg:#EFF6FF;
+    --blue-fg:#1D4ED8;
+    --pink:#EC6A9E;
+    --pink-tint:#FCEAF2;
+    --orange:#F27A2A;
+    --teal-bg:#DCF3E9;
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--cream);
+    color:var(--ink);
+    font-family:'Inter',system-ui,sans-serif;
+    font-size:15px;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:inherit;text-decoration:none;}
+  .wrap{max-width:1240px;margin:0 auto;padding:32px 24px;}
+  .caps{font-family:'Inter',sans-serif;font-size:11px;letter-spacing:.18em;text-transform:uppercase;font-weight:600;color:var(--muted);}
+  .caps-sm{font-size:10px;letter-spacing:.18em;text-transform:uppercase;font-weight:600;color:var(--muted);}
+  .serif{font-family:'Playfair Display',serif;}
+
+  /* NAV */
+  nav.top{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:20px 24px;border-bottom:1px solid var(--ink);
+    max-width:1240px;margin:0 auto;
+  }
+  .brand{display:flex;align-items:center;gap:10px;}
+  .brand .mark{font-family:'Playfair Display',serif;font-weight:900;font-size:26px;letter-spacing:-.02em;position:relative;}
+  .brand small{display:block;font-size:9px;letter-spacing:.28em;color:var(--muted);margin-top:-4px;}
+  nav.top .links{display:flex;gap:26px;font-size:13px;font-weight:500;}
+  nav.top .links a:hover{color:var(--indigo);}
+  .pill-btn{border:1.5px solid var(--ink);padding:8px 14px;font-size:12px;font-weight:600;letter-spacing:.04em;background:var(--cream);}
+  .pill-btn:hover{background:var(--ink);color:var(--cream);}
+
+  /* GRID PRIMITIVES */
+  .bento{display:grid;grid-template-columns:repeat(12,1fr);gap:18px;}
+  .card{
+    background:var(--cream);
+    border:1.5px solid var(--ink);
+    padding:28px;
+    position:relative;
+  }
+  .card.thin{border-width:1px;}
+  .card.thick{border-width:2px;}
+  .card.xthick{border-width:3px;}
+  .card.accent-left{border-left:4px solid var(--indigo);}
+  .card.inverted{background:var(--ink);color:var(--cream);}
+  .card.tint{background:var(--cream-2);}
+  .card.tint-teal{background:var(--teal-tint);}
+  .card.tint-amber{background:var(--amber-tint);}
+  .card.tint-indigo{background:var(--indigo-tint);}
+  .card.tint-pink{background:var(--pink-tint);}
+  .card.tint-red{background:var(--red-tint);}
+  .card.tint-blue{background:var(--blue-bg);}
+
+  .c-teal{color:var(--teal);} .c-indigo{color:var(--indigo);}
+  .c-amber{color:var(--amber);} .c-red{color:var(--red);}
+  .c-blue{color:var(--blue);} .c-pink{color:var(--pink);} .c-orange{color:var(--orange);}
+
+  /* Ambient background sparkles */
+  body::before{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+    background-image:
+      radial-gradient(circle at 8% 12%, var(--teal-tint) 0 220px, transparent 260px),
+      radial-gradient(circle at 92% 6%, var(--indigo-tint) 0 260px, transparent 300px),
+      radial-gradient(circle at 96% 78%, var(--amber-tint) 0 260px, transparent 320px),
+      radial-gradient(circle at 4% 88%, var(--pink-tint) 0 220px, transparent 280px);
+    opacity:.55;
+  }
+  nav.top, .wrap, footer{position:relative;z-index:1;}
+
+
+  .hero-lockup{display:inline-block;margin:8px 0 10px;}
+  h1.hero{
+    font-family:'Playfair Display',serif;
+    font-weight:900;
+    font-size:clamp(88px,14vw,200px);
+    line-height:.85;
+    letter-spacing:-.04em;
+    margin:0;
+    position:relative;
+    display:block;
+  }
+  .hero-sub{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    font-family:'Inter',sans-serif;
+    font-weight:600;
+    text-transform:uppercase;
+    color:var(--ink);
+    width:100%;
+    box-sizing:border-box;
+    font-size:clamp(10px,1.05vw,14px);
+    margin-top:8px;
+   }
+  .hero-sub span{display:inline-block;}
+  .hero-sub .dot{opacity:.45;font-weight:400;}
+
+
+
+
+  .h-section{font-family:'Playfair Display',serif;font-weight:800;font-size:clamp(32px,4vw,52px);line-height:1;letter-spacing:-.02em;}
+  .h-card{font-family:'Playfair Display',serif;font-weight:800;font-size:28px;line-height:1.05;letter-spacing:-.01em;}
+  .h-sm{font-family:'Playfair Display',serif;font-weight:700;font-size:20px;letter-spacing:-.01em;}
+  p.lead{font-size:18px;line-height:1.5;color:var(--ink);}
+  p.muted{color:var(--muted);}
+
+  /* BUTTONS */
+  .btn{display:inline-flex;align-items:center;gap:8px;font-weight:600;font-size:14px;padding:14px 20px;border:1.5px solid var(--ink);cursor:pointer;transition:transform .1s ease;}
+  .btn:active{transform:translateY(1px);}
+  .btn-primary{background:var(--indigo);color:#fff;border-color:var(--indigo);}
+  .btn-primary:hover{background:#3f379a;}
+  .btn-outline{background:transparent;color:var(--ink);}
+  .btn-outline:hover{background:var(--ink);color:var(--cream);}
+  .btn-block{width:100%;justify-content:center;padding:18px;font-size:15px;}
+
+  /* HERO */
+  .hero-grid{display:grid;grid-template-columns:2fr 1fr;gap:18px;margin-top:24px;}
+  .hero-left{padding:56px 48px;position:relative;overflow:hidden;}
+  .hero-left::before{content:"01 / HELLO";position:absolute;top:16px;right:20px;font-size:10px;letter-spacing:.22em;color:var(--muted);}
+  .hero-left .tag{font-family:'Playfair Display',serif;font-style:italic;font-size:22px;margin:20px 0 12px;}
+  .hero-left .body{max-width:520px;color:var(--muted);font-size:16px;margin-bottom:28px;}
+  .cta-row{display:flex;gap:12px;flex-wrap:wrap;}
+  .meta-row{display:flex;gap:16px;margin-top:22px;font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);}
+  .meta-row span{display:flex;align-items:center;gap:6px;}
+  .meta-row i{width:6px;height:6px;background:var(--teal);border-radius:50%;display:inline-block;}
+
+  /* SCORE PANEL (hero right + reused) */
+  .score-panel{padding:26px;display:flex;flex-direction:column;gap:16px;}
+  .score-head{display:flex;justify-content:space-between;align-items:flex-start;}
+  .score-head .lbl{font-size:10px;letter-spacing:.22em;color:var(--muted);}
+  .score-row{display:flex;align-items:center;gap:20px;}
+  .score-ring{
+    --p:81;--color:var(--teal);
+    width:96px;height:96px;border-radius:50%;flex-shrink:0;
+    background:
+      conic-gradient(var(--color) calc(var(--p)*1%), #E8E4DE 0);
+    display:grid;place-items:center;position:relative;
+  }
+  .score-ring::before{content:"";position:absolute;inset:5px;background:var(--cream);border-radius:50%;}
+  .score-ring .n{position:relative;font-family:'Playfair Display',serif;font-weight:800;font-size:32px;line-height:1;}
+  .score-ring .l{position:relative;font-size:8px;letter-spacing:.22em;color:var(--muted);margin-top:2px;}
+  .metrics{flex:1;display:flex;flex-direction:column;gap:9px;}
+  .metric{display:grid;grid-template-columns:80px 1fr 28px;gap:10px;align-items:center;font-size:10px;letter-spacing:.14em;color:var(--muted);font-weight:600;}
+  .metric .bar{height:5px;background:#E8E4DE;border-radius:3px;overflow:hidden;}
+  .metric .bar span{display:block;height:100%;border-radius:3px;transform-origin:left;animation:grow 1.2s ease forwards;transform:scaleX(0);}
+  @keyframes grow{to{transform:scaleX(1);}}
+  .metric .val{font-family:'Inter',sans-serif;font-weight:700;font-size:12px;text-align:right;letter-spacing:0;}
+  .metric.teal .bar span,.metric.teal .val{background:var(--teal);color:var(--teal);}
+  .metric.teal .val{background:transparent;}
+  .metric.amber .bar span{background:var(--amber);} .metric.amber .val{color:var(--amber);}
+  .metric.red .bar span{background:var(--red);} .metric.red .val{color:var(--red);}
+  .tier{font-size:11px;font-weight:700;letter-spacing:.14em;}
+  .tier.teal{color:var(--teal);} .tier.amber{color:var(--amber);} .tier.red{color:var(--red);}
+
+  /* In-panel refine demo — fills the score panel */
+  .panel-refine{margin-top:auto;padding-top:16px;border-top:1px dashed var(--soft-line);display:flex;flex-direction:column;gap:10px;}
+  .refine-label{font-size:10px;letter-spacing:.2em;color:var(--muted);font-weight:700;display:flex;align-items:center;gap:6px;}
+  .refine-label .ic{color:var(--indigo);}
+  .refine-weak{background:#fff;border:1px solid var(--soft-line);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--muted);font-style:italic;line-height:1.45;}
+  .refine-flow{display:flex;align-items:center;gap:8px;font-size:10px;letter-spacing:.16em;color:var(--indigo);font-weight:700;}
+  .refine-flow .ar{font-family:'Playfair Display',serif;font-size:16px;letter-spacing:0;}
+  .refine-strong{background:#fff;border:1px solid var(--soft-line);border-left:3px solid var(--indigo);border-radius:0 8px 8px 0;padding:10px 12px;font-size:12px;line-height:1.5;color:var(--ink);}
+  .refine-foot{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--muted);flex-wrap:wrap;}
+  .refine-foot .ext-badge{font-size:9px;}
+
+  /* DOWNLOAD */
+  .dl-card{padding:44px;position:relative;}
+  .dl-card .num{position:absolute;top:20px;right:28px;font-family:'Playfair Display',serif;font-size:64px;color:var(--soft-line);line-height:1;}
+  .dl-meta{display:flex;gap:20px;margin-top:14px;font-size:12px;color:var(--muted);flex-wrap:wrap;}
+  .dl-meta span{display:flex;align-items:center;gap:6px;}
+  .counter{display:inline-block;margin-top:10px;font-size:12px;color:var(--teal);font-weight:600;letter-spacing:.05em;}
+
+  /* FEATURES BENTO */
+  .f-grid{display:grid;grid-template-columns:repeat(12,1fr);grid-auto-rows:minmax(180px,auto);gap:18px;}
+  .f1{grid-column:span 7;grid-row:span 1;}
+  .f2{grid-column:span 5;grid-row:span 2;}
+  .f3{grid-column:span 3;}
+  .f4{grid-column:span 4;}
+  .f5{grid-column:span 5;}
+  .f6{grid-column:span 12;}
+
+  .kbd{display:inline-block;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;padding:2px 6px;background:var(--cream-2);border:1px solid var(--soft-line);border-radius:4px;}
+  .chip{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;}
+  .chip::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor;}
+  .chip.warn{background:var(--amber-bg);color:var(--amber-fg);}
+  .chip.info{background:var(--blue-bg);color:var(--blue-fg);}
+  .chip.ok{background:var(--teal-bg);color:var(--teal);}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;}
+
+  .before-after{display:grid;grid-template-columns:1fr auto 1fr;gap:20px;align-items:stretch;margin-top:20px;}
+  .ba-box{border:1px solid var(--soft-line);background:#fff;padding:16px;font-size:13px;line-height:1.5;position:relative;}
+  .ba-box .lb{position:absolute;top:-9px;left:12px;background:var(--cream);padding:0 8px;font-size:10px;letter-spacing:.18em;color:var(--muted);font-weight:700;}
+  .ba-box.after{border-left:3px solid var(--indigo);}
+  .ba-arrow{display:grid;place-items:center;font-family:'Playfair Display',serif;font-size:32px;color:var(--indigo);}
+  .ba-score{margin-top:8px;font-size:11px;letter-spacing:.12em;font-weight:700;}
+  .ba-score.red{color:var(--red);} .ba-score.teal{color:var(--teal);}
+
+  .metric-list{display:flex;flex-direction:column;gap:22px;margin-top:24px;}
+  .metric-list h4{font-family:'Inter',sans-serif;font-size:11px;letter-spacing:.18em;font-weight:700;color:var(--ink);margin-bottom:6px;}
+  .metric-list p{font-size:13px;color:var(--muted);line-height:1.5;}
+  .metric-list .rail{height:3px;background:var(--soft-line);margin-top:8px;position:relative;overflow:hidden;}
+  .metric-list .rail::after{content:"";position:absolute;left:0;top:0;height:100%;background:currentColor;width:var(--w,60%);}
+  .metric-list li.teal{color:var(--teal);} .metric-list li.amber{color:var(--amber);} .metric-list li.indigo{color:var(--indigo);} .metric-list li.red{color:var(--red);}
+  .metric-list li{list-style:none;}
+
+  /* HOW IT WORKS */
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
+  .step{position:relative;padding:36px 28px 32px;overflow:hidden;border:1.5px solid var(--ink);background:var(--cream);}
+  .step .n{position:absolute;top:8px;right:14px;font-family:'Playfair Display',serif;font-weight:900;font-size:120px;color:var(--soft-line);line-height:1;pointer-events:none;}
+  .step:nth-child(1){background:var(--teal-tint);}
+  .step:nth-child(2){background:var(--amber-tint);}
+  .step:nth-child(3){background:var(--indigo-tint);}
+  .step:nth-child(1) .n{color:rgba(29,158,117,.28);}
+  .step:nth-child(2) .n{color:rgba(239,159,39,.32);}
+  .step:nth-child(3) .n{color:rgba(83,74,183,.28);}
+  .install-step:nth-child(4n+1){background:var(--teal-tint);}
+  .install-step:nth-child(4n+2){background:var(--amber-tint);}
+  .install-step:nth-child(4n+3){background:var(--pink-tint);}
+  .install-step:nth-child(4n+4){background:var(--indigo-tint);}
+  .install-step:nth-child(4n+1) .n{color:var(--teal);}
+  .install-step:nth-child(4n+2) .n{color:var(--amber);}
+  .install-step:nth-child(4n+3) .n{color:var(--pink);}
+  .install-step:nth-child(4n+4) .n{color:var(--indigo);}
+  .sec-head .caps{position:relative;padding-left:14px;}
+  .sec-head .caps::before{content:"✦";position:absolute;left:0;top:-1px;color:var(--indigo);font-size:12px;}
+
+  .step h3{position:relative;font-family:'Playfair Display',serif;font-weight:800;font-size:24px;margin-bottom:10px;}
+  .step p{position:relative;color:var(--muted);font-size:14px;}
+
+  /* UI PREVIEW */
+  .preview-stage{background:#0F0E0D;border:2px solid var(--ink);padding:56px 32px;position:relative;overflow:hidden;}
+  .preview-stage::before{content:"EXTENSION PREVIEW";position:absolute;top:14px;left:20px;font-size:10px;letter-spacing:.24em;color:#5B564E;}
+  .preview-stage::after{content:"● LIVE";position:absolute;top:14px;right:20px;font-size:10px;letter-spacing:.24em;color:var(--teal);}
+  .panels{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:32px;justify-items:center;}
+  .ext-panel{
+    width:320px;background:var(--cream);border:1px solid var(--soft-line);border-radius:12px;
+    padding:18px;box-shadow:0 10px 40px rgba(0,0,0,.35);position:relative;font-size:12px;
+  }
+  .ext-head{display:flex;justify-content:center;position:relative;padding:6px 0 14px;}
+  .ext-logo{font-family:'Playfair Display',serif;font-weight:900;font-size:28px;letter-spacing:-.02em;position:relative;}
+  .ext-icons{position:absolute;right:0;top:8px;display:flex;gap:6px;}
+  .ext-ico{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:transparent;border:1px solid var(--soft-line);font-size:12px;color:var(--muted);}
+  .ext-tag{text-align:center;font-size:8px;letter-spacing:.24em;color:var(--muted);margin-top:-8px;margin-bottom:14px;}
+  .ext-scorerow{display:flex;gap:14px;align-items:center;margin-bottom:14px;}
+  .ext-scorerow .score-ring{width:80px;height:80px;}
+  .ext-scorerow .score-ring .n{font-size:26px;}
+  .ext-metrics{flex:1;display:flex;flex-direction:column;gap:7px;}
+  .ext-metrics .metric{grid-template-columns:70px 1fr 24px;font-size:9px;}
+  .ext-metrics .metric .val{font-size:11px;}
+  .ext-tier{font-size:10px;font-weight:700;letter-spacing:.14em;margin:-6px 0 2px;}
+  .ext-summary{font-size:11px;color:var(--muted);line-height:1.4;margin-bottom:12px;}
+  .ext-section-label{font-size:9px;letter-spacing:.2em;color:var(--muted);font-weight:700;margin:10px 0 6px;display:flex;justify-content:space-between;align-items:center;}
+  .ext-input{background:#fff;border:1px solid var(--soft-line);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--ink);}
+  .ext-input.placeholder{color:#A6A099;}
+  .ext-token{font-size:10px;color:var(--muted);margin-top:6px;}
+  .ext-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;}
+  .ext-chips .chip{font-size:10px;padding:3px 8px;}
+  .ext-controls{display:flex;align-items:center;gap:14px;padding:12px 0;margin:12px 0;border-top:1px solid var(--soft-line);border-bottom:1px solid var(--soft-line);font-size:10px;letter-spacing:.14em;color:var(--muted);font-weight:700;}
+  .toggle{width:32px;height:16px;background:var(--indigo);border-radius:20px;position:relative;}
+  .toggle::after{content:"";position:absolute;top:2px;right:2px;width:12px;height:12px;background:#fff;border-radius:50%;}
+  .toggle.off{background:#D9D4CC;}
+  .toggle.off::after{right:auto;left:2px;}
+  .ext-select{margin-left:auto;border:1px solid var(--soft-line);background:#fff;border-radius:6px;padding:4px 10px;font-size:11px;color:var(--ink);letter-spacing:0;font-weight:500;}
+  .ext-refined{background:#fff;border-left:3px solid var(--indigo);padding:10px 12px;border-radius:0 8px 8px 0;font-size:12px;line-height:1.5;color:var(--ink);}
+  .ext-badge{background:var(--teal-bg);color:var(--teal);padding:2px 8px;border-radius:20px;font-size:9px;letter-spacing:.1em;font-weight:700;}
+  .ext-buttons{display:flex;gap:10px;margin-top:14px;}
+  .ext-btn{flex:1;padding:9px 0;text-align:center;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;}
+  .ext-btn.ghost{background:#fff;border:1px solid var(--soft-line);color:var(--ink);}
+  .ext-btn.primary{background:var(--indigo);color:#fff;}
+
+  /* HISTORY panel */
+  .hist-back{position:absolute;top:14px;left:14px;width:28px;height:28px;border-radius:50%;border:1px solid var(--soft-line);display:grid;place-items:center;font-size:14px;color:var(--muted);}
+  .hist-row{display:flex;gap:10px;align-items:center;background:#fff;border:1px solid var(--soft-line);border-radius:8px;padding:8px 10px;margin-bottom:6px;font-size:11px;}
+  .hist-score{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:700;color:var(--teal);background:var(--teal-bg);flex-shrink:0;}
+  .hist-score.amber{color:var(--amber);background:var(--amber-bg);}
+  .hist-score.red{color:var(--red);background:#FDE7E7;}
+  .hist-row .txt{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink);}
+  .hist-row .meta{font-size:9px;color:var(--muted);}
+  .upgrade-banner{margin-top:12px;padding:10px 12px;background:#EEECFB;border:1px solid #C7C2EE;color:var(--indigo);font-size:11px;font-weight:600;border-radius:8px;text-align:center;}
+
+  /* PRICING */
+  .price-grid{display:grid;grid-template-columns:5fr 7fr;gap:18px;}
+  .price-card ul{list-style:none;display:flex;flex-direction:column;gap:10px;margin:22px 0;}
+  .price-card li{font-size:14px;display:flex;gap:10px;align-items:flex-start;}
+  .price-card li::before{content:"✓";color:var(--teal);font-weight:700;}
+  .price-num{font-family:'Playfair Display',serif;font-weight:800;font-size:56px;line-height:1;margin:14px 0;}
+  .price-num small{font-family:'Inter',sans-serif;font-size:14px;font-weight:500;color:var(--muted);letter-spacing:0;}
+  .strike{text-decoration:line-through;color:var(--muted);font-size:26px;font-weight:600;margin-right:8px;}
+  .badge{display:inline-block;background:var(--ink);color:var(--cream);font-size:10px;letter-spacing:.2em;font-weight:700;padding:5px 10px;margin-bottom:6px;}
+  .badge.indigo{background:var(--indigo);}
+
+  /* INSTALL */
+  .install-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+  .install-step{border:1.5px solid var(--ink);background:var(--cream);padding:22px 18px;position:relative;min-height:160px;}
+  .install-step .n{font-family:'Playfair Display',serif;font-weight:900;font-size:28px;color:var(--indigo);letter-spacing:-.02em;}
+  .install-step h4{font-family:'Playfair Display',serif;font-weight:700;font-size:16px;margin:6px 0 8px;line-height:1.15;}
+  .install-step p{font-size:12.5px;color:var(--muted);line-height:1.5;}
+  .warn-card{margin-top:18px;border:1.5px dashed var(--amber);background:var(--amber-bg);padding:18px 22px;font-size:14px;color:var(--amber-fg);font-weight:500;}
+
+  /* TECH */
+  .tech-list{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;}
+  .tech-list span{border:1px solid var(--ink);padding:6px 12px;font-size:12px;font-weight:600;}
+
+  /* FOOTER */
+  footer{border-top:3px solid var(--ink);margin-top:60px;padding:26px 24px;max-width:1240px;margin-left:auto;margin-right:auto;display:flex;justify-content:space-between;align-items:center;font-size:12px;letter-spacing:.06em;flex-wrap:wrap;gap:12px;}
+
+  /* SECTIONS */
+  section{margin-top:80px;}
+  .sec-head{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:24px;gap:20px;flex-wrap:wrap;}
+  .sec-head .h-section{max-width:700px;}
+  .sec-head .caps{font-size:11px;}
+  .rule{height:1px;background:var(--ink);margin:12px 0 22px;}
+
+  /* Reveal */
+  .reveal{opacity:0;transform:translateY(14px);transition:opacity .7s ease,transform .7s ease;}
+  .reveal.in{opacity:1;transform:none;}
+
+  /* Responsive */
+  @media(max-width:960px){
+    .hero-grid,.price-grid,.before-after{grid-template-columns:1fr;}
+    .before-after .ba-arrow{transform:rotate(90deg);}
+    .steps{grid-template-columns:1fr;}
+    .install-grid{grid-template-columns:repeat(2,1fr);}
+    .f1,.f2,.f3,.f4,.f5,.f6{grid-column:span 12;}
+    nav.top .links{display:none;}
+    h1.hero{font-size:96px;}
+    .hero-left{padding:32px 24px;}
+  }
+  @media(max-width:520px){
+    .install-grid{grid-template-columns:1fr;}
+    .panels{gap:22px;}
+  }
+</style>
+</head>
+<body>
+
+<nav class="top">
+  <div class="brand">
+    <div>
+      <div class="mark">RED</div>
+      <small>REFINE EVERY DETAIL</small>
+    </div>
+  </div>
+  <div class="links">
+    <a href="#features">Features</a>
+    <a href="#how">How it works</a>
+    <a href="#preview">Preview</a>
+    <a href="#pricing">Pricing</a>
+    <a href="#install">Install</a>
+  </div>
+  <a href="RED-v1.0.0.zip" download="RED-v1.0.0.zip" class="pill-btn">↓ Download</a>
+</nav>
+
+<div class="wrap">
+
+  <!-- HERO -->
+  <div class="hero-grid reveal">
+    <div class="card thick hero-left">
+      <div class="caps">v1.0.0 · Chrome · Manifest V3</div>
+      <div class="hero-lockup">
+        <h1 class="hero">RED</h1>
+        <div class="hero-sub" aria-label="Refine Every Detail"><span>R</span><span>E</span><span>F</span><span>I</span><span>N</span><span>E</span><span class="dot">·</span><span>E</span><span>V</span><span>E</span><span>R</span><span>Y</span><span class="dot">·</span><span>D</span><span>E</span><span>T</span><span>A</span><span>I</span><span>L</span></div>
+      </div>
+      <p class="tag">Your prompts, refined. Instantly.</p>
+      <p class="body">Real-time analysis. AI-powered rewrites. Score your prompts before you send them — right inside any AI chat interface.</p>
+      <div class="cta-row">
+        <a href="RED-v1.0.0.zip" download="RED-v1.0.0.zip" class="btn btn-primary">⬇ Download v1.0.0 — Free</a>
+        <a href="https://github.com/mihirzoting/RED" class="btn btn-outline">View on GitHub →</a>
+      </div>
+      <div class="meta-row">
+        <span><i></i>100% local scoring</span>
+        <span><i style="background:var(--indigo)"></i>AI refines built-in</span>
+        <span><i style="background:var(--amber)"></i>No signup to try</span>
+      </div>
+    </div>
+
+    <div class="card thick score-panel tint-teal">
+      <div class="score-head">
+        <div>
+          <div class="caps-sm">LIVE PROMPT SCORE</div>
+          <div class="h-sm" style="margin-top:6px;">Sample analysis</div>
+        </div>
+        <div class="caps-sm" style="color:var(--teal);">● ACTIVE</div>
+      </div>
+      <div class="score-row">
+        <div class="score-ring" style="--p:81;--color:var(--teal);">
+          <div class="n">81</div>
+          <div class="l">SCORE</div>
+        </div>
+        <div class="metrics">
+          <div class="metric teal"><span>CLARITY</span><div class="bar"><span style="width:100%;animation-delay:.1s"></span></div><div class="val">100</div></div>
+          <div class="metric red"><span>CONTEXT</span><div class="bar"><span style="width:40%;animation-delay:.25s"></span></div><div class="val">40</div></div>
+          <div class="metric teal"><span>EFFICIENCY</span><div class="bar"><span style="width:100%;animation-delay:.4s"></span></div><div class="val">100</div></div>
+          <div class="metric teal"><span>SPECIFICITY</span><div class="bar"><span style="width:85%;animation-delay:.55s"></span></div><div class="val">85</div></div>
+        </div>
+      </div>
+      <div class="tier teal">HIGH ≥ 80 · GOOD</div>
+      <p class="muted" style="font-size:13px;">3 of 4 metrics at target. Context at 40 — add background to reach 90+.</p>
+
+      <div class="panel-refine">
+        <div class="refine-label"><span class="ic">✦</span> AI REFINE · ONE CLICK</div>
+        <div class="refine-weak">"help me write a blog post"</div>
+        <div class="refine-flow"><span class="ar">↻</span> REFINED IN-CHAT</div>
+        <div class="refine-strong">"Write a 600-word blog post on [topic] for beginners. Include a hook, 3 subheadings, and a CTA. Tone: friendly, practical."</div>
+        <div class="refine-foot"><span class="ext-badge">+46 PTS</span> 38 → 84 · paste back with one click</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DOWNLOAD -->
+  <section id="download" style="margin-top:60px;">
+    <div class="card xthick accent-left dl-card reveal tint-indigo">
+      <div class="num">01</div>
+      <div class="caps">DOWNLOAD · FREE FOREVER</div>
+      <h2 class="h-section" style="margin-top:10px;">Install RED in 60 seconds.</h2>
+      <p class="lead muted" style="margin-top:10px;max-width:640px;">No Web Store. No review wait. Download the ZIP, load it in Chrome, and start refining.</p>
+      <div style="margin-top:26px;max-width:520px;">
+        <a href="RED-v1.0.0.zip" download="RED-v1.0.0.zip" class="btn btn-primary btn-block">⬇ Download RED v1.0.0 — Free</a>
+        <div class="dl-meta">
+          <span>● Chrome Extension</span>
+          <span>● Manifest V3</span>
+          <span>● ~2.4 MB</span>
+        </div>
+        <div class="counter">↓ 312 installs</div>
+      </div>
+      <p class="muted" style="margin-top:22px;font-size:13px;">Prefer Git? Clone from <a href="https://github.com/mihirzoting/RED" style="border-bottom:1px solid var(--ink);">github.com/mihirzoting/RED</a></p>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section id="features">
+    <div class="sec-head reveal">
+      <div>
+        <div class="caps">02 / WHAT IT DOES</div>
+        <h2 class="h-section" style="margin-top:8px;">Six sharp features. Zero bloat.</h2>
+      </div>
+      <p class="muted" style="max-width:320px;font-size:14px;">Every part of RED is designed to make your prompts measurably better — locally, instantly, without leaving your chat window.</p>
+    </div>
+
+    <div class="f-grid">
+      <!-- F1 wide -->
+      <div class="card thick f1 reveal tint-blue">
+        <div class="caps-sm">01 · REAL-TIME ANALYSIS</div>
+        <h3 class="h-card" style="margin:10px 0 12px;">Runs 100% locally. Zero API calls.</h3>
+        <p class="muted">Detects vague words, filler words, run-on sentences, missing context, and ambiguous references — results appear within <b style="color:var(--ink);">500 ms</b> of typing.</p>
+        <div class="chips">
+          <span class="chip warn">Vague words</span>
+          <span class="chip warn">Filler</span>
+          <span class="chip info">Run-on</span>
+          <span class="chip info">Missing context</span>
+        </div>
+      </div>
+
+      <!-- F2 tall -->
+      <div class="card thick f2 reveal">
+        <div class="caps-sm">02 · 4 SCORE METRICS</div>
+        <h3 class="h-card" style="margin:10px 0 4px;">One score. Four lenses.</h3>
+        <ul class="metric-list">
+          <li class="teal"><h4>CLARITY</h4><p>Penalizes vague words and run-on sentences. Rewards specific language.</p><div class="rail" style="--w:92%"></div></li>
+          <li class="indigo"><h4>CONTEXT RICHNESS</h4><p>Checks if your prompt gives enough background. Flags short or ambiguous prompts.</p><div class="rail" style="--w:70%"></div></li>
+          <li class="amber"><h4>TOKEN EFFICIENCY</h4><p>Measures filler word density. Clean prompts score higher.</p><div class="rail" style="--w:80%"></div></li>
+          <li class="red"><h4>SPECIFICITY</h4><p>Rewards numbers, proper nouns, code references. Penalizes vague language.</p><div class="rail" style="--w:66%"></div></li>
+        </ul>
+        <p class="muted" style="font-size:12px;border-top:1px solid var(--soft-line);padding-top:10px;">Overall score = average of all 4 · 0–100</p>
+      </div>
+
+      <!-- F3 small -->
+      <div class="card thick f3 reveal tint-amber">
+        <div class="caps-sm">03 · TOKEN COUNTER</div>
+        <div class="serif" style="font-size:36px;font-weight:800;margin:14px 0 4px;letter-spacing:-.02em;">36<span style="font-size:16px;color:var(--muted);font-weight:500;"> tokens</span></div>
+        <div style="font-family:ui-monospace,monospace;font-size:13px;color:var(--indigo);">$0.000029</div>
+        <p class="muted" style="font-size:13px;margin-top:14px;">Know your cost before you send.</p>
+      </div>
+
+      <!-- F4 -->
+      <div class="card thick f4 reveal tint-teal">
+        <div class="caps-sm">04 · WORKS OFFLINE</div>
+        <div style="font-size:36px;margin:14px 0 4px;">⌀</div>
+        <h3 class="h-sm">No internet needed for scoring.</h3>
+        <p class="muted" style="font-size:13px;margin-top:8px;">Local analysis runs 100% in your browser. Your prompts never leave your machine unless you refine.</p>
+      </div>
+
+      <!-- F5 medium -->
+      <div class="card thick f5 reveal tint-pink">
+        <div class="caps-sm">05 · ISSUE DETECTION</div>
+        <h3 class="h-sm" style="margin:10px 0 12px;">Flagged inline. As you type.</h3>
+        <div class="chips">
+          <span class="chip warn">⚠ Missing context</span>
+          <span class="chip warn">⚠ Filler words</span>
+          <span class="chip info">ℹ Short prompt</span>
+        </div>
+        <p class="muted" style="font-size:13px;margin-top:14px;">No waiting. No modal. Chips update the moment you pause typing.</p>
+      </div>
+
+      <!-- F6 wide before/after -->
+      <div class="card xthick f6 reveal tint-indigo">
+        <div class="caps-sm">06 · AI-POWERED REFINE</div>
+        <h3 class="h-card" style="margin:10px 0 6px;">One click. Rewritten. Streamed back.</h3>
+        <p class="muted">Send a weak prompt, get a stronger one. RED rewrites in place — you paste it back with a click.</p>
+        <div class="before-after">
+          <div class="ba-box">
+            <span class="lb">BEFORE</span>
+            "explain this to me in detail please and also make it simpler"
+            <div class="ba-score red">SCORE 41 / 100 · LOW</div>
+          </div>
+          <div class="ba-arrow">→</div>
+          <div class="ba-box after">
+            <span class="lb">AFTER · REFINED</span>
+            "Break down [topic] into simple terms. Use an analogy for the core concept, then provide a step-by-step explanation at a beginner level."
+            <div class="ba-score teal">SCORE 86 / 100 · +45 PTS</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section id="how">
+    <div class="sec-head reveal">
+      <div>
+        <div class="caps">03 / HOW IT WORKS</div>
+        <h2 class="h-section" style="margin-top:8px;">Three steps. Under a second.</h2>
+      </div>
+    </div>
+    <div class="steps">
+      <div class="step reveal">
+        <div class="n">01</div>
+        <h3>Type your prompt</h3>
+        <p>Start typing in any AI chat interface. RED detects your input automatically — no shortcuts, no setup.</p>
+      </div>
+      <div class="step reveal">
+        <div class="n">02</div>
+        <h3>RED scores it instantly</h3>
+        <p>4 metrics. Overall score. Issue chips. Token count. All in under 500 ms. Runs entirely in your browser.</p>
+      </div>
+      <div class="step reveal">
+        <div class="n">03</div>
+        <h3>Refine with one click</h3>
+        <p>Click Refine. RED rewrites your prompt using AI. Stream the result in real time. Paste it back with one click.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- PREVIEW -->
+  <section id="preview">
+    <div class="sec-head reveal">
+      <div>
+        <div class="caps">04 / EXTENSION PREVIEW</div>
+        <h2 class="h-section" style="margin-top:8px;">What it looks like.</h2>
+      </div>
+      <p class="muted" style="max-width:340px;font-size:14px;">Real UI, recreated in pure HTML/CSS. The floating panel sits in the corner of any AI chat surface.</p>
+    </div>
+
+    <div class="preview-stage reveal">
+      <div class="panels">
+        <!-- Panel 1: Analysis -->
+        <div class="ext-panel">
+          <div class="ext-head">
+            <div class="ext-logo">RED</div>
+            <div class="ext-icons">
+              <div class="ext-ico">⚙</div>
+              <div class="ext-ico">↻</div>
+            </div>
+          </div>
+          <div class="ext-tag">REFINE EVERY DETAIL</div>
+
+          <div class="ext-scorerow">
+            <div class="score-ring" style="--p:66;--color:var(--amber);">
+              <div class="n">66</div><div class="l">SCORE</div>
+            </div>
+            <div class="ext-metrics">
+              <div class="metric teal"><span>CLARITY</span><div class="bar"><span style="width:82%"></span></div><div class="val">82</div></div>
+              <div class="metric amber"><span>CONTEXT</span><div class="bar"><span style="width:64%"></span></div><div class="val">64</div></div>
+              <div class="metric amber"><span>EFFICIENCY</span><div class="bar"><span style="width:71%"></span></div><div class="val">71</div></div>
+              <div class="metric red"><span>SPECIFICITY</span><div class="bar"><span style="width:48%"></span></div><div class="val">48</div></div>
+            </div>
+          </div>
+          <div class="ext-tier" style="color:var(--amber)">MED ≥ 50 · WARNING</div>
+          <p class="ext-summary">Improve specificity — add concrete numbers, dataset names, or an example.</p>
+
+          <div class="ext-section-label"><span>✦ PROMPT</span></div>
+          <div class="ext-input">analyze my past prompts to find patterns</div>
+          <div class="ext-token">9 tokens · $0.0000072</div>
+
+          <div class="ext-section-label"><span>✦ ISSUES 2</span></div>
+          <div class="ext-chips">
+            <span class="chip warn">Missing output format</span>
+            <span class="chip info">Specify dataset scope</span>
+          </div>
+
+          <div class="ext-controls">
+            <span>DEEP</span><div class="toggle off"></div>
+            <span style="margin-left:6px;">STYLE</span>
+            <select class="ext-select"><option>Default</option></select>
+          </div>
+
+          <div class="ext-section-label"><span>✦ REFINED PROMPT</span></div>
+          <div class="ext-input placeholder">Waiting for input…</div>
+
+          <div class="ext-buttons">
+            <div class="ext-btn ghost">Paste</div>
+            <div class="ext-btn primary">Re-refine</div>
+          </div>
+        </div>
+
+        <!-- Panel 2: Refined -->
+        <div class="ext-panel">
+          <div class="ext-head">
+            <div class="ext-logo">RED</div>
+            <div class="ext-icons">
+              <div class="ext-ico">⚙</div>
+              <div class="ext-ico">↻</div>
+            </div>
+          </div>
+          <div class="ext-tag">REFINE EVERY DETAIL</div>
+
+          <div class="ext-scorerow">
+            <div class="score-ring" style="--p:81;--color:var(--teal);">
+              <div class="n">81</div><div class="l">SCORE</div>
+            </div>
+            <div class="ext-metrics">
+              <div class="metric teal"><span>CLARITY</span><div class="bar"><span style="width:100%"></span></div><div class="val">100</div></div>
+              <div class="metric red"><span>CONTEXT</span><div class="bar"><span style="width:40%"></span></div><div class="val">40</div></div>
+              <div class="metric teal"><span>EFFICIENCY</span><div class="bar"><span style="width:100%"></span></div><div class="val">100</div></div>
+              <div class="metric teal"><span>SPECIFICITY</span><div class="bar"><span style="width:85%"></span></div><div class="val">85</div></div>
+            </div>
+          </div>
+          <div class="ext-tier" style="color:var(--teal)">HIGH ≥ 80 · GOOD</div>
+          <p class="ext-summary">3 of 4 metrics at target. Context at 40 — needs improvement.</p>
+
+          <div class="ext-section-label"><span>✦ PROMPT</span></div>
+          <div class="ext-input">refine my prompt</div>
+          <div class="ext-token">4 tokens · $0.000003</div>
+
+          <div class="ext-section-label"><span>✦ ISSUES 2</span></div>
+          <div class="ext-chips">
+            <span class="chip warn">Missing context</span>
+            <span class="chip info">Short prompt</span>
+          </div>
+
+          <div class="ext-controls">
+            <span>DEEP</span><div class="toggle"></div>
+            <span style="margin-left:6px;">STYLE</span>
+            <select class="ext-select"><option>Detailed</option></select>
+          </div>
+
+          <div class="ext-section-label"><span>✦ REFINED PROMPT</span><span class="ext-badge">+15 PTS</span></div>
+          <div class="ext-refined">Please provide the original prompt you would like me to refine, and I will rephrase it to be clearer, more specific, and more effective while maintaining the original intent.</div>
+
+          <div class="ext-buttons">
+            <div class="ext-btn ghost">Paste</div>
+            <div class="ext-btn primary">Re-refine</div>
+          </div>
+        </div>
+
+        <!-- Panel 3: History -->
+        <div class="ext-panel">
+          <div class="hist-back">←</div>
+          <div class="ext-head">
+            <div class="ext-logo">RED</div>
+          </div>
+          <div class="ext-tag">REFINE EVERY DETAIL</div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
+            <div style="background:var(--cream-2);padding:8px 10px;border-radius:6px;"><div class="caps-sm" style="font-size:8px;">AVG SCORE</div><div class="serif" style="font-weight:800;font-size:22px;">92</div></div>
+            <div style="background:var(--cream-2);padding:8px 10px;border-radius:6px;"><div class="caps-sm" style="font-size:8px;">PROMPTS</div><div class="serif" style="font-weight:800;font-size:22px;">5</div></div>
+            <div style="background:var(--cream-2);padding:8px 10px;border-radius:6px;"><div class="caps-sm" style="font-size:8px;">TOKENS SAVED</div><div class="serif" style="font-weight:800;font-size:22px;">232</div></div>
+            <div style="background:var(--cream-2);padding:8px 10px;border-radius:6px;"><div class="caps-sm" style="font-size:8px;">REFINEMENTS</div><div class="serif" style="font-weight:800;font-size:22px;">0</div></div>
+          </div>
+
+          <div class="ext-section-label"><span>✦ RECENT PROMPTS</span></div>
+          <div class="hist-row">
+            <div class="hist-score">100</div>
+            <div class="txt">i guess some of the info in this prom…<div class="meta">13 min ago · 41 tok</div></div>
+          </div>
+          <div class="hist-row">
+            <div class="hist-score">81</div>
+            <div class="txt">i want a download feature form whe…<div class="meta">17 min ago · 20 tok</div></div>
+          </div>
+          <div class="hist-row">
+            <div class="hist-score">100</div>
+            <div class="txt">Create a minimalist Brutalist-inspir…<div class="meta">19 min ago · 157 tok</div></div>
+          </div>
+          <div class="hist-row">
+            <div class="hist-score amber">81</div>
+            <div class="txt">what should i add here for my exten…<div class="meta">32 min ago · 9 tok</div></div>
+          </div>
+
+          <div class="upgrade-banner">✦ Upgrade to Premium for full analytics →</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRICING -->
+  <section id="pricing">
+    <div class="sec-head reveal">
+      <div>
+        <div class="caps">05 / PRICING</div>
+        <h2 class="h-section" style="margin-top:8px;">Free forever. Or lifetime, once.</h2>
+      </div>
+      <p class="muted" style="max-width:340px;font-size:14px;">No subscriptions. No trials that lapse. Pay once for Premium and own it.</p>
+    </div>
+
+    <div class="price-grid">
+      <div class="card thick price-card reveal">
+        <div class="badge" style="background:transparent;color:var(--ink);border:1px solid var(--ink);">FREE</div>
+        <h3 class="h-card" style="margin-top:12px;">Free</h3>
+        <div class="price-num">₹0 <small>forever</small></div>
+        <ul>
+          <li>Unlimited local analysis</li>
+          <li>4 score metrics in real time</li>
+          <li>Token count + cost estimate</li>
+          <li>Issue detection + inline highlights</li>
+          <li>10 AI refines per day</li>
+          <li>2 free re-refines per prompt</li>
+          <li>Session history (up to 20 prompts)</li>
+        </ul>
+        <a href="RED-v1.0.0.zip" download="RED-v1.0.0.zip" class="btn btn-outline btn-block">⬇ Download Free</a>
+      </div>
+
+      <div class="card xthick accent-left price-card reveal tint-indigo" style="position:relative;">
+        <div class="badge indigo">LIFETIME ACCESS</div>
+        <h3 class="h-card" style="margin-top:12px;">Premium</h3>
+        <div class="price-num"><span class="strike">₹1499</span>₹999 <small>one-time · lifetime</small></div>
+        <ul style="columns:2;column-gap:32px;">
+          <li>Everything in Free</li>
+          <li>300 AI refines per day (30×)</li>
+          <li>Priority routing — races 2 AI providers</li>
+          <li>Deep refine mode (larger, smarter models)</li>
+          <li>4 refine styles: Default, Concise, Detailed, Code-focused</li>
+          <li>Persistent history in cloud</li>
+          <li>Analytics dashboard + score trends</li>
+          <li>Export history as CSV</li>
+        </ul>
+        <a href="https://rzp.io/i/upgrade-red" class="btn btn-primary btn-block">Get Lifetime Access →</a>
+        <p class="muted" style="font-size:12px;margin-top:12px;text-align:center;">One-time payment. No subscription. No renewal ever.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- INSTALL -->
+  <section id="install">
+    <div class="sec-head reveal">
+      <div>
+        <div class="caps">06 / INSTALLATION</div>
+        <h2 class="h-section" style="margin-top:8px;">Eight steps. Two minutes.</h2>
+      </div>
+      <a href="RED-v1.0.0.zip" download="RED-v1.0.0.zip" class="btn btn-primary">⬇ Grab the ZIP first</a>
+    </div>
+
+    <div class="install-grid">
+      <div class="install-step reveal"><div class="n">01</div><h4>Download the ZIP</h4><p>Click the download button above. File: <b>RED-v1.0.0.zip</b> (~2.4 MB).</p></div>
+      <div class="install-step reveal"><div class="n">02</div><h4>Unzip the file</h4><p>Extract RED-v1.0.0.zip to a permanent folder on your computer.</p></div>
+      <div class="install-step reveal"><div class="n">03</div><h4>Open Chrome Extensions</h4><p>Go to <span class="kbd">chrome://extensions</span> in your Chrome browser.</p></div>
+      <div class="install-step reveal"><div class="n">04</div><h4>Enable Developer Mode</h4><p>Toggle <b>Developer mode</b> in the top-right corner of the page.</p></div>
+      <div class="install-step reveal"><div class="n">05</div><h4>Load Unpacked</h4><p>Click <b>Load unpacked</b> and select the unzipped RED folder.</p></div>
+      <div class="install-step reveal"><div class="n">06</div><h4>Pin to toolbar</h4><p>Click the puzzle piece icon → find RED → click the pin icon.</p></div>
+      <div class="install-step reveal"><div class="n">07</div><h4>Sign up free</h4><p>Click the RED icon → create a free account with email or Google.</p></div>
+      <div class="install-step reveal"><div class="n">08</div><h4>Start refining</h4><p>Open any AI chat interface and start typing. RED activates automatically.</p></div>
+    </div>
+
+    <div class="warn-card reveal">⚠ <b>Important:</b> Keep the RED folder in a permanent location. Moving it after loading will break the extension.</div>
+  </section>
+
+  <!-- TECH -->
+  <section>
+    <div class="card thin reveal" style="padding:32px;">
+      <div class="caps">07 / BUILT WITH</div>
+      <h3 class="h-sm" style="margin-top:8px;">A lean, edge-first stack.</h3>
+      <div class="tech-list">
+        <span>Manifest V3</span>
+        <span>Vanilla JS</span>
+        <span>Supabase · Auth + DB + Edge Functions</span>
+        <span>Groq</span>
+        <span>Gemini</span>
+        <span>OpenRouter</span>
+        <span>gpt-tokenizer · local</span>
+        <span>Chart.js</span>
+        <span>Tabler Icons</span>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<footer>
+  <div>RED — Refine Every Detail · v1.0.0</div>
+  <div>Built by Mihir Zoting · <a href="https://github.com/mihirzoting/RED" style="border-bottom:1px solid var(--ink);">github.com/mihirzoting/RED</a></div>
+</footer>
+
+<script>
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} });
+  },{threshold:.12});
+  document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+
+</body>
+</html>
