@@ -31,10 +31,7 @@ function Index() {
       <nav className="top">
         <div className="inner">
           <div className="brand">
-            <div>
-              <div className="mark">RED</div>
-              <small>REFINE EVERY DETAIL</small>
-            </div>
+            <img src="/logo.svg" alt="RED" className="logo-svg" />
           </div>
           <div className="links">
             <a href="#features">Features</a>
