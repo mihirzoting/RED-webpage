@@ -20,6 +20,9 @@ dist-ssr
 .nitro
 .tanstack
 
+# Nitro / Vite caches
+node_modules/.nitro
+
 # Environment
 .env
 .env.*
