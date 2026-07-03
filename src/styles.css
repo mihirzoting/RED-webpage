@@ -139,7 +139,7 @@
 nav.top{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--cream);border-bottom:1px solid var(--ink);}
 nav.top .inner{display:flex;align-items:center;justify-content:space-between;padding:20px 24px;max-width:1240px;margin:0 auto;}
 .brand{display:flex;align-items:center;gap:10px;}
-.brand .logo-svg{height:32px;width:auto;display:block;}
+.brand .logo-svg{height:48px;width:auto;display:block;}
 nav.top .links{display:flex;gap:26px;font-size:13px;font-weight:500;}
 nav.top .links a:hover{color:var(--indigo);}
 .pill-btn{border:1.5px solid var(--ink);padding:8px 14px;font-size:12px;font-weight:600;letter-spacing:.04em;background:var(--cream);}
