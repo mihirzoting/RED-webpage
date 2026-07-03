@@ -512,7 +512,9 @@ function Index() {
                 <li>Analytics dashboard + score trends</li>
                 <li>Export history as CSV</li>
               </ul>
-              <a href="https://rzp.io/i/upgrade-red" className="btn btn-primary btn-block">Get Lifetime Access →</a>
+              <p className="muted" style={{ fontSize: 13, textAlign: "center", fontStyle: "italic" }}>
+                Upgrade through the extension
+              </p>
               <p className="muted" style={{ fontSize: 12, marginTop: 12, textAlign: "center" }}>
                 One-time payment. No subscription. No renewal ever.
               </p>
