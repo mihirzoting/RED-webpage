@@ -29,22 +29,24 @@ function Index() {
   return (
     <div ref={rootRef}>
       <nav className="top">
-        <div className="brand">
-          <div>
-            <div className="mark">RED</div>
-            <small>REFINE EVERY DETAIL</small>
+        <div className="inner">
+          <div className="brand">
+            <div>
+              <div className="mark">RED</div>
+              <small>REFINE EVERY DETAIL</small>
+            </div>
           </div>
+          <div className="links">
+            <a href="#features">Features</a>
+            <a href="#how">How it works</a>
+            <a href="#preview">Preview</a>
+            <a href="#pricing">Pricing</a>
+            <a href="#install">Install</a>
+          </div>
+          <a href="RED-v1.0.0.zip" download="RED-v1.0.0.zip" className="pill-btn">
+            ↓ Download
+          </a>
         </div>
-        <div className="links">
-          <a href="#features">Features</a>
-          <a href="#how">How it works</a>
-          <a href="#preview">Preview</a>
-          <a href="#pricing">Pricing</a>
-          <a href="#install">Install</a>
-        </div>
-        <a href="RED-v1.0.0.zip" download="RED-v1.0.0.zip" className="pill-btn">
-          ↓ Download
-        </a>
       </nav>
 
       <div className="wrap">
