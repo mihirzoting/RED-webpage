@@ -466,7 +466,6 @@ function Index() {
                   <div className="hist-score amber">81</div>
                   <div className="txt">what should i add here for my exten…<div className="meta">32 min ago · 9 tok</div></div>
                 </div>
-                <div className="upgrade-banner">✦ Upgrade to Premium for full analytics →</div>
               </div>
             </div>
           </div>
